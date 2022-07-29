@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Team;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Validator;
 
 class TeamController extends Controller
 {
@@ -14,17 +16,11 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        try {
+            return Team::all();
+        } catch (\Throwable $th) {
+            return response("Something Went Wrong", 500);
+        }
     }
 
     /**
@@ -34,30 +30,22 @@ class TeamController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        //
-    }
+    {   
+        try {
+            $validated = Validator::make([
+                "name" => "required|max:50",
+                "email" => "required|email|",
+                "password" => "required|min:5"
+            ]);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Team  $team
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Team $team)
-    {
-        //
-    }
+            if($validated->fails()){
+                return respons($validated->errors(), 400);
+            }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Team  $team
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Team $team)
-    {
-        //
+            return Team::create($request->all());
+        } catch (\Throwable $th) {
+            return response("Something Went Wrong", 500);
+        }
     }
 
     /**
@@ -69,7 +57,16 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        //
+        try {
+            $data = Product::find($id);
+            $data->name = $request->name;
+            $data->stock = $request->stock;
+            $data->price = $request->price;
+            $data->update();
+        } catch (\Illuminate\Database\QueryException $ex){ 
+            return $this->sendError('Something Went Wrong', null);
+        }
+        return response($data, 201);
     }
 
     /**
@@ -78,8 +75,12 @@ class TeamController extends Controller
      * @param  \App\Models\Team  $team
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Team $team)
+    public function destroy($id)
     {
-        //
+        try {
+            return Team::destroy($id);
+        } catch (\Throwable $th) {
+            return response("Something Went Wrong",500);
+        }
     }
 }

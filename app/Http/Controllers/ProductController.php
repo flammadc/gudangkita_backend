@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Validator;
 
 class ProductController extends Controller
 {
@@ -14,19 +16,14 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            return Product::all();
+        } catch (\Throwable $th) {
+            return response("Something went wrong", 500);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
+    
     /**
      * Store a newly created resource in storage.
      *
@@ -35,7 +32,18 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = Validator::make($request->all(), [
+            "name" => "required",
+            "category_id" => "required|integer",
+            "category_id" => "required|integer",
+            "category_id" => "required"
+        ]);
+        
+        if($validated->fails()){
+            return $this-sendError($validated->errors());
+        }
+        
+        return Product::create($request->all());
     }
 
     /**
@@ -44,22 +52,15 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show($id)
     {
-        //
+        try {
+            return Product::find($id);
+        } catch (\Throwable $th) {
+            return response("Something Went Wrong", 500);
+        }
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
+    
     /**
      * Update the specified resource in storage.
      *
@@ -67,9 +68,18 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $data = Product::find($id);
+            $data->name = $request->name;
+            $data->stock = $request->stock;
+            $data->price = $request->price;
+            $data->update();
+        } catch (\Illuminate\Database\QueryException $ex){ 
+            return $this->sendError('Something Went Wrong', null);
+        }
+        return response($data, 201);
     }
 
     /**
@@ -78,8 +88,15 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
-    {
-        //
+    public function destroy($id)
+    {   
+        try {
+            !Product::destroy($id);
+        } catch (\Throwable $th) {
+
+            return response("Something Went Wrong", 500);
+        }
+        
+        return response("Product has been Deleted", 200);
     }
 }

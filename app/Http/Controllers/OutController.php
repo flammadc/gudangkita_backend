@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Out;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class OutController extends Controller
 {
@@ -14,17 +15,11 @@ class OutController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        try {
+            return Out::all();
+        } catch (\Throwable $th) {
+            return response("Something Went Wrong", 500);
+        }
     }
 
     /**
@@ -35,7 +30,7 @@ class OutController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
