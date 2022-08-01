@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Validator;
@@ -17,32 +17,7 @@ class TeamController extends Controller
     public function index()
     {
         try {
-            return Team::all();
-        } catch (\Throwable $th) {
-            return response("Something Went Wrong", 500);
-        }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {   
-        try {
-            $validated = Validator::make([
-                "name" => "required|max:50",
-                "email" => "required|email|",
-                "password" => "required|min:5"
-            ]);
-
-            if($validated->fails()){
-                return respons($validated->errors(), 400);
-            }
-
-            return Team::create($request->all());
+            return User::all();
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }
@@ -58,15 +33,10 @@ class TeamController extends Controller
     public function update(Request $request, Team $team)
     {
         try {
-            $data = Product::find($id);
-            $data->name = $request->name;
-            $data->stock = $request->stock;
-            $data->price = $request->price;
-            $data->update();
-        } catch (\Illuminate\Database\QueryException $ex){ 
-            return $this->sendError('Something Went Wrong', null);
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
         }
-        return response($data, 201);
     }
 
     /**
@@ -78,7 +48,7 @@ class TeamController extends Controller
     public function destroy($id)
     {
         try {
-            return Team::destroy($id);
+            return User::destroy($id);
         } catch (\Throwable $th) {
             return response("Something Went Wrong",500);
         }
