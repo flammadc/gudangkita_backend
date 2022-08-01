@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory;
     protected $guarded = [""];
 }
