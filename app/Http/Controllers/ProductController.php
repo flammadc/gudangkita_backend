@@ -35,8 +35,8 @@ class ProductController extends Controller
         $validated = Validator::make($request->all(), [
             "name" => "required",
             "category_id" => "required|integer",
-            "category_id" => "required|integer",
-            "category_id" => "required"
+            "stock" => "required|integer",
+            "price" => "required"
         ]);
         
         if($validated->fails()){
@@ -91,7 +91,7 @@ class ProductController extends Controller
     public function destroy($id)
     {   
         try {
-            !Product::destroy($id);
+            Product::destroy($id);
         } catch (\Throwable $th) {
 
             return response("Something Went Wrong", 500);

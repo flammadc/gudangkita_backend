@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Outcome;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Validator;
 
-class CategoryController extends Controller
+class OutcomeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,9 +18,9 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            return Category::all();
+            return Outcome::all();
         } catch (\Throwable $th) {
-            return response("Something went wrong", 500);
+            return response("Something Went Wrong", 500);
         }
     }
 
@@ -30,29 +33,38 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = Validator::make($request->all(), [
-            "name" => "required",
-            "category_id" => "required|integer",
-            "stock" => "required|integer",
-            "price" => "required"
+            "product_id" => "required|integer",
+            "price" => "required|string",
+            "quantity" => "required|integer",
+            "amount" => "required|string",
         ]);
-        
+
         if($validated->fails()){
             return $this-sendError($validated->errors());
         }
+
+        $product = Product::find($request->product_id);
+        $product->stock += $request->quantity;
+        $product->update();
         
-        return Category::create($request->all());
+        return Outcome::create([
+            "product_id" => $request['product_id'],
+            "price" => $request['price'],
+            "quantity" => $request['quantity'],
+            "amount" => $request['amount'],
+        ]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Out $out)
     {
         try {
-            return Category::find($id);
+            return Outcome::find($id);
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }
@@ -62,14 +74,18 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Out $out)
     {
         try {
-            $data = Category::find($id);
+            $data = Outcome::find($id);
             $data->name = $request->name;
+            $data->supplier = $request->supplier;
+            $data->price = $request->price;
+            $data->quantity = $request->quantity;
+            $data->amount = $request->amount;
             $data->update();
         } catch (\Illuminate\Database\QueryException $ex){ 
             return $this->sendError('Something Went Wrong', null);
@@ -80,18 +96,16 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy(Out $out)
     {
         try {
-            Category::destroy($id);
+            Outcome::destroy($id);
         } catch (\Throwable $th) {
-
             return response("Something Went Wrong", 500);
-        }
-        
+        }        
         return response("Product has been Deleted", 200);
     }
 }
