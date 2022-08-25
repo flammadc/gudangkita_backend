@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Hash;
 use Validator;
 
 class TeamController extends Controller
@@ -30,13 +31,22 @@ class TeamController extends Controller
      * @param  \App\Models\Team  $team
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Team $team)
+    public function update(Request $request, $id)
     {
         try {
-            //code...
-        } catch (\Throwable $th) {
-            //throw $th;
+            $data = User::find($id);
+            $path = $request->file('profile') ?  $request->file("profile")->store("profiles") : $data->profile;
+            $password = $request->password ? bcrypt($request->password) : $data->password;
+            $data->name = $request->name;
+            $data->email = $request->email;
+            $data->profile = $path;
+            $data->password = $password;
+            $data->update();
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return response($ex, 500);
         }
+
+        return response($data, 201);
     }
 
     /**

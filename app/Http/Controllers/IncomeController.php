@@ -6,6 +6,8 @@ use App\Models\Income;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Validator;
+use Carbon\Carbon;
+use DB;
 
 class IncomeController extends Controller
 {
@@ -104,5 +106,25 @@ class IncomeController extends Controller
         }
         
         return response("Product has been Deleted", 200);
+    }
+
+    /**
+     * Display stats of Income this year.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stats()
+    {
+        try {
+            $income = Income::whereYear("created_at", date("Y"))
+            ->selectRaw('month(created_at) month, sum(amount) amount')
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+        } catch (\Throwable $th) {
+            return response($th, 500);
+        }
+
+        return response($income, 200);
     }
 }

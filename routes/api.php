@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\OutcomeController;
+use App\Http\Controllers\TeamController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,6 +28,10 @@ Route::group(["prefix" => "auth"], function(){
 Route::group(["middleware" => ["auth:sanctum"]], function(){
     Route::resource("products",ProductController::class);
     Route::resource("categories",CategoryController::class);
-    Route::resource("income",IncomeController::class);
+    Route::group(["prefix" => "incomes"], function() {
+        Route::resource("/",IncomeController::class);
+        Route::get("/stats",[IncomeController::class, "stats"]);
+    });
     Route::resource("outcome",OutcomeController::class);
+    Route::resource("teams",TeamController::class);    
 });
