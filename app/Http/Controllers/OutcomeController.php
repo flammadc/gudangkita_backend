@@ -18,7 +18,7 @@ class OutcomeController extends Controller
     public function index()
     {
         try {
-            return Outcome::all();
+            return Outcome::orderBy("created_at", "desc")->get();
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }
@@ -107,5 +107,42 @@ class OutcomeController extends Controller
             return response("Something Went Wrong", 500);
         }        
         return response("Product has been Deleted", 200);
+    }
+
+    /**
+     * Display stats of Income this year.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stats()
+    {
+        try {
+            $outcome = Outcome::whereYear("created_at", date("Y"))
+            ->selectRaw('month(created_at) month, sum(amount) amount')
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+        } catch (\Throwable $th) {
+            return response($th, 500);
+        }
+
+        return response($outcome, 200);
+    }
+
+    /**
+     * Display Total amount of Outcome this year.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function total(){
+        try {
+            $outcome = Outcome::whereYear("created_at", date("Y"))
+            ->selectRaw('sum(amount) amount')
+            ->get();
+        } catch (\Throwable $th) {
+            return response($th, 500);
+        }
+
+        return response($outcome, 200);
     }
 }

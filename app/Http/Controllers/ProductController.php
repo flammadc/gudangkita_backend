@@ -19,7 +19,7 @@ class ProductController extends Controller
         try {
             return Product::all();
         } catch (\Throwable $th) {
-            return response("Something went wrong", 500);
+            return response($th, 500);
         }
     }
 

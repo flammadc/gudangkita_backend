@@ -19,19 +19,26 @@ use App\Http\Controllers\TeamController;
 |
 */
 
-Route::group(["prefix" => "auth"], function(){
+Route::group(["prefix" => "auth", "middleware" => ["cors"]], function(){
     Route::post("register", [AuthController::class, "register"]);
-    Route::post("login", [AuthController::class, "login"]);
+    Route::post("login", [AuthController::class, "login"])->name("login");
     Route::post("logout/{id}", [AuthController::class, "logout"]);
 });
 
-Route::group(["middleware" => ["auth:sanctum"]], function(){
+
+
+Route::group(["middleware" => ["auth:sanctum", "cors"]], function() {
     Route::resource("products",ProductController::class);
     Route::resource("categories",CategoryController::class);
     Route::group(["prefix" => "incomes"], function() {
         Route::resource("/",IncomeController::class);
         Route::get("/stats",[IncomeController::class, "stats"]);
+        Route::get("/total",[IncomeController::class, "total"]);
     });
-    Route::resource("outcome",OutcomeController::class);
-    Route::resource("teams",TeamController::class);    
+    Route::group(["prefix" => "outcomes"], function(){
+        Route::resource("/",OutcomeController::class);
+        Route::get("/stats",[OutcomeController::class, "stats"]);
+        Route::get("/total",[OutcomeController::class, "total"]);
+    });
+    Route::resource("teams",TeamController::class);  
 });

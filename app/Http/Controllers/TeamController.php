@@ -35,7 +35,7 @@ class TeamController extends Controller
     {
         try {
             $data = User::find($id);
-            $path = $request->file('profile') ?  $request->file("profile")->store("profiles") : $data->profile;
+            $path = $request->file('profile') ?  $request->file("profile")->store("profiles", ['disk' => 'public']) : $data->profile;
             $password = $request->password ? bcrypt($request->password) : $data->password;
             $data->name = $request->name;
             $data->email = $request->email;

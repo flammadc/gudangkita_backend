@@ -19,9 +19,9 @@ class IncomeController extends Controller
     public function index()
     {
         try {
-            return Income::all();
+            return Income::orderBy("created_at", "desc")->get();
         } catch (\Throwable $th) {
-            return response("Something went wrong", 500);
+            return response($th, 500);
         }
     }
 
@@ -120,6 +120,23 @@ class IncomeController extends Controller
             ->selectRaw('month(created_at) month, sum(amount) amount')
             ->groupBy('month')
             ->orderBy('month', 'asc')
+            ->get();
+        } catch (\Throwable $th) {
+            return response($th, 500);
+        }
+
+        return response($income, 200);
+    }
+
+    /**
+     * Display Total amount of Income this year.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function total(){
+        try {
+            $income = Income::whereYear("created_at", date("Y"))
+            ->selectRaw('sum(amount) amount')
             ->get();
         } catch (\Throwable $th) {
             return response($th, 500);
