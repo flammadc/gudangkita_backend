@@ -19,7 +19,7 @@ class IncomeController extends Controller
     public function index()
     {
         try {
-            return Income::orderBy("created_at", "desc")->get();
+            return Income::with(['product'])->orderBy("created_at", "desc")->get();
         } catch (\Throwable $th) {
             return response($th, 500);
         }
@@ -37,7 +37,6 @@ class IncomeController extends Controller
             "product_id" => "required|integer",
             "price" => "required|string",
             "quantity" => "required|integer",
-            "amount" => "required|string",
         ]);
 
         if($validated->fails()){
@@ -45,14 +44,14 @@ class IncomeController extends Controller
         }
         
         $product = Product::find($request->product_id);
-        $product->stock -= $request->quantity;
+        $product->stock = $product->stock ? $product->stock -= $request->quantity : $request->quantity;
         $product->update();
         
         return Income::create([
             "product_id" => $request['product_id'],
             "price" => $request['price'],
             "quantity" => $request['quantity'],
-            "amount" => $request['amount'],
+            "amount" => ($request['price'] * $request['quantity']),
         ]);
     }
 
@@ -61,12 +60,12 @@ class IncomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function show()
+    public function show($id)
     {
         try {
-            return Income::find($id);
+            return Income::with(['product'])->find($id);
         } catch (\Throwable $th) {
-            return response("Something Went Wrong", 500);
+            return response($th, 500);
         }
     }
 
@@ -77,14 +76,16 @@ class IncomeController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         try {
-            $data = Income::find($id);
-            $data->name = $request->name;
-            $data->price = $request->price;
+            $data = Income::with(['product'])->find($id);
+            $product = Product::find($data->product->category_id);
+            $product->stock = $product->stock + ($data->quantity - $request->quantity);
             $data->quantity = $request->quantity;
             $data->amount = $request->amount;
+
+            $product->update();
             $data->update();
         } catch (\Illuminate\Database\QueryException $ex){ 
             return $this->sendError('Something Went Wrong', null);
@@ -97,12 +98,17 @@ class IncomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy()
+    public function destroy($id)
     {
         try {
+            $income = Income::with(['product'])->find($id);
+            $product = Product::find($income->product->id);
+            $product->stock = $product->stock + $income->quantity;
+            
+            $product->update();
             Income::destroy($id);
         } catch (\Throwable $th) {
-            return response("Something Went Wrong", 500);
+            return response($th, 500);
         }
         
         return response("Product has been Deleted", 200);
@@ -124,7 +130,7 @@ class IncomeController extends Controller
         } catch (\Throwable $th) {
             return response($th, 500);
         }
-
+        
         return response($income, 200);
     }
 

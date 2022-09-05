@@ -17,7 +17,7 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            return Product::all();
+            return Product::orderBy("updated_at", "desc")->get();
         } catch (\Throwable $th) {
             return response($th, 500);
         }
@@ -35,8 +35,6 @@ class ProductController extends Controller
         $validated = Validator::make($request->all(), [
             "name" => "required",
             "category_id" => "required|integer",
-            "stock" => "required|integer",
-            "price" => "required"
         ]);
         
         if($validated->fails()){
@@ -55,7 +53,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            return Product::find($id);
+            return Product::with(['category'])->find($id);
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }

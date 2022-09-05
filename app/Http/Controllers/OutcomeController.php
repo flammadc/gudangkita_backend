@@ -18,7 +18,7 @@ class OutcomeController extends Controller
     public function index()
     {
         try {
-            return Outcome::orderBy("created_at", "desc")->get();
+            return Outcome::with(['product'])->orderBy("created_at", "desc")->get();
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }
@@ -36,7 +36,6 @@ class OutcomeController extends Controller
             "product_id" => "required|integer",
             "price" => "required|string",
             "quantity" => "required|integer",
-            "amount" => "required|string",
         ]);
 
         if($validated->fails()){
@@ -51,7 +50,7 @@ class OutcomeController extends Controller
             "product_id" => $request['product_id'],
             "price" => $request['price'],
             "quantity" => $request['quantity'],
-            "amount" => $request['amount'],
+            "amount" => $request['price'] * $request['quantity'],
         ]);
     }
 
@@ -61,10 +60,10 @@ class OutcomeController extends Controller
      * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function show(Out $out)
+    public function show($id)
     {
         try {
-            return Outcome::find($id);
+            return Outcome::with(['product'])->find($id);
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);
         }
@@ -77,15 +76,16 @@ class OutcomeController extends Controller
      * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Out $out)
+    public function update(Request $request, $id)
     {
         try {
             $data = Outcome::find($id);
-            $data->name = $request->name;
-            $data->supplier = $request->supplier;
-            $data->price = $request->price;
+            $product = Product::find($data->product_id);
+            $product->stock = $product->stock - ($data->quantity - $request->quantity);
             $data->quantity = $request->quantity;
             $data->amount = $request->amount;
+            
+            $product->update();
             $data->update();
         } catch (\Illuminate\Database\QueryException $ex){ 
             return $this->sendError('Something Went Wrong', null);
@@ -99,9 +99,13 @@ class OutcomeController extends Controller
      * @param  \App\Models\Out  $out
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Out $out)
+    public function destroy($id)
     {
         try {
+            $outcome = Outcome::with(['product'])->find($id);
+            $product = Product::find($outcome->product->id);
+            $product->stock = $product->stock - $outcome->quantity;
+            $product->update();
             Outcome::destroy($id);
         } catch (\Throwable $th) {
             return response("Something Went Wrong", 500);

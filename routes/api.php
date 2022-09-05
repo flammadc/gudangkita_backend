@@ -34,11 +34,17 @@ Route::group(["middleware" => ["auth:sanctum", "cors"]], function() {
         Route::resource("/",IncomeController::class);
         Route::get("/stats",[IncomeController::class, "stats"]);
         Route::get("/total",[IncomeController::class, "total"]);
+        Route::get("/{id}",[IncomeController::class, "show"]);
+        Route::put("/{id}",[IncomeController::class, "update"]);
+        Route::delete("/{id}",[IncomeController::class, "destroy"]);
     });
     Route::group(["prefix" => "outcomes"], function(){
         Route::resource("/",OutcomeController::class);
         Route::get("/stats",[OutcomeController::class, "stats"]);
         Route::get("/total",[OutcomeController::class, "total"]);
+        Route::get("/{id}",[OutcomeController::class, "show"]);
+        Route::put("/{id}",[OutcomeController::class, "update"]);
+        Route::delete("/{id}",[OutcomeController::class, "destroy"]);
     });
     Route::resource("teams",TeamController::class);  
 });
