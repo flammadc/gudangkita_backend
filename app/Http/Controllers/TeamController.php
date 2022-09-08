@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class TeamController extends Controller
@@ -49,7 +50,13 @@ class TeamController extends Controller
     {
         try {
             $data = User::find($id);
-            $path = $request->file('profile') ?  $request->file("profile")->store("profiles", ['disk' => 'public']) : $data->profile;
+            $path = $data->profile;
+            if($request->file('profile')){
+                if($data->profile){
+                    Storage::disk("public")->delete($data->profile);
+                }
+                $path = $request->file('profile')->store('profiles', ['disk' => 'public']);
+            }
             $password = $request->password ? bcrypt($request->password) : $data->password;
             $data->name = $request->name;
             $data->email = $request->email;
