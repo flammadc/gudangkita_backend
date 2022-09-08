@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Validator;
 
 class CategoryController extends Controller
 {
@@ -31,9 +32,6 @@ class CategoryController extends Controller
     {
         $validated = Validator::make($request->all(), [
             "name" => "required",
-            "category_id" => "required|integer",
-            "stock" => "required|integer",
-            "price" => "required"
         ]);
         
         if($validated->fails()){
@@ -65,7 +63,7 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
         try {
             $data = Category::find($id);
@@ -83,12 +81,11 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
         try {
             Category::destroy($id);
         } catch (\Throwable $th) {
-
             return response("Something Went Wrong", 500);
         }
         

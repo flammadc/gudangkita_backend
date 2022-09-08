@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\OutcomeController;
+use App\Http\Controllers\TeamController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,15 +19,32 @@ use App\Http\Controllers\OutcomeController;
 |
 */
 
-Route::group(["prefix" => "auth"], function(){
+Route::group(["prefix" => "auth", "middleware" => ["cors"]], function(){
     Route::post("register", [AuthController::class, "register"]);
-    Route::post("login", [AuthController::class, "login"]);
+    Route::post("login", [AuthController::class, "login"])->name("login");
     Route::post("logout/{id}", [AuthController::class, "logout"]);
 });
 
-Route::group(["middleware" => ["auth:sanctum"]], function(){
+
+
+Route::group(["middleware" => ["auth:sanctum", "cors"]], function() {
     Route::resource("products",ProductController::class);
     Route::resource("categories",CategoryController::class);
-    Route::resource("income",IncomeController::class);
-    Route::resource("outcome",OutcomeController::class);
+    Route::group(["prefix" => "incomes"], function() {
+        Route::resource("/",IncomeController::class);
+        Route::get("/stats",[IncomeController::class, "stats"]);
+        Route::get("/total",[IncomeController::class, "total"]);
+        Route::get("/{id}",[IncomeController::class, "show"]);
+        Route::put("/{id}",[IncomeController::class, "update"]);
+        Route::delete("/{id}",[IncomeController::class, "destroy"]);
+    });
+    Route::group(["prefix" => "outcomes"], function(){
+        Route::resource("/",OutcomeController::class);
+        Route::get("/stats",[OutcomeController::class, "stats"]);
+        Route::get("/total",[OutcomeController::class, "total"]);
+        Route::get("/{id}",[OutcomeController::class, "show"]);
+        Route::put("/{id}",[OutcomeController::class, "update"]);
+        Route::delete("/{id}",[OutcomeController::class, "destroy"]);
+    });
+    Route::resource("teams",TeamController::class);  
 });
