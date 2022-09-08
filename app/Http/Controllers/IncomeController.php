@@ -80,7 +80,7 @@ class IncomeController extends Controller
     {
         try {
             $data = Income::with(['product'])->find($id);
-            $product = Product::find($data->product->category_id);
+            $product = Product::find($data->product->id);
             $product->stock = $product->stock + ($data->quantity - $request->quantity);
             $data->quantity = $request->quantity;
             $data->amount = $request->amount;
@@ -126,7 +126,7 @@ class IncomeController extends Controller
             ->selectRaw('month(created_at) month, sum(amount) amount')
             ->groupBy('month')
             ->orderBy('month', 'asc')
-            ->get();
+            ->get();    
         } catch (\Throwable $th) {
             return response($th, 500);
         }
